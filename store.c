@@ -1,50 +1,13 @@
-#include"store.h"
+#include "store.h"
+#include "products.h"
+#include "shopping_cart.h"
+#include "ui.h"
 
-static NodeProduct* New_Node(int id, int codebar, float price, int stock, const char* name, const char* tag)
-{
-    NodeProduct* n = (NodeProduct*)malloc(sizeof(NodeProduct));
-    if (n) {
-        n->next = n->prev = NULL;
-        n->products = (Products*)malloc(sizeof(Products));
-        if (n->products) {
-            Create_Node_Products(n->products, id, codebar, price, stock, name, tag);
-        }
-        else {
-            free(n);
-            n = NULL;
-        }
-    }
-    return n;
-}
-
-void Create_Node_Products(Products* p, int id, int codebar, float price, int stock, const char* name, const char* tag)
-{
-    p->id = id;
-    p->codebar = codebar;
-    p->price = price;
-    p->stock = stock;
-    strcpy(p->name, name);
-    strcpy(p->tag, tag);
-}
-
-void Create_Products(Store* nstore, int codebar, float price, int stock, const char* name, const char* tag) {
-    NodeProduct* n = New_Node(nstore->len, codebar, price, stock, name, tag);
-    if (!n)
-    {
-        fprintf(stderr, "Memoria insuficiente");
-        return;
-    }
-    if (nstore->len == 0) {
-        nstore->first = nstore->last = n;
-    }
-    else {
-        nstore->last->next = n;
-        n->prev = nstore->last;
-        nstore->last = n;
-    }
-    nstore->len++;
-}
-
+/**
+ * @brief Crea una nueva tienda.
+ * @param name Nombre de la tienda.
+ * @return Puntero a la tienda creada.
+ */
 Store* New_Store(const char* name)
 {
     Store* s = (Store*)malloc(sizeof(Store));
@@ -56,7 +19,11 @@ Store* New_Store(const char* name)
     }
     return s;
 }
-
+/**
+ * @brief Destruye una tienda y libera memoria.
+ * @param store Puntero a la tienda a destruir.
+ * @warning SÓLO debe usarse para salir del programa, además de asegurarse que exista una tienda que borrar
+ */
 void Destroy_Store(Store** store) {
     assert(store);
     NodeProduct* current = (*store)->first;
@@ -70,13 +37,13 @@ void Destroy_Store(Store** store) {
     *store = NULL;
 }
 
-void Destroy_Product(NodeProduct** node) {
-    assert(node);
-    free((*node)->products);
-    free(*node);
-    *node = NULL;
-}
-
+/**
+ * @brief Elimina un producto de la tienda y mueve a la derecha el cursor.
+ * @warning elimina donde esta ubicado el cursor
+ * @param store Puntero a la tienda.
+ * @param id Identificador único del producto a eliminar.
+ * @warning Debe de asegurarse que el producto exista antes de ejecutar esta función, en dado caso se disparara un 'assert()'
+ */
 void Remove_Product(Store* store) {
     assert(store->cursor);
     if (store->cursor == store->first)
@@ -112,87 +79,12 @@ static void Adjust_ID(Store* store)
         n = n->next;
     }
 }
-void Print_Title() {
-    printf("\033[38;5;82m\n               _     _\n              | |   (_)\n  ___ __ _ ___| |__  _  ___ _ __ \n / __/ _` / __| '_ \\| |/ _ \\ '__|\n |(_| (_| \\__ \\ | | | |  __/ | \n \\___\\__,_|___/_| |_|_|\\___|_|  \033[0m");
-    /*" Imprime lo siguiente:
-               _     _
-              | |   (_)
-  ___ __ _ ___| |__  _  ___ _ __
- / __/ _` / __| '_ \| |/ _ \ '__|
-| (_| (_| \__ \ | | | |  __/ |
- \___\__,_|___/_| |_|_|\___|_|
-
-     "*/
-}
-
-void Print_Menu(char* store_name)
-{
-    printf("\n=====| %s |=====\n(1) Ver Inventario\n(2) Añadir Producto\n(3) Remover Producto\n(4) Sumar Productos al Inventario\n(5) Restar Productos al Inventario\n(6) Añadir Producto al Carrito\n(7) Comprar Productos del Carrito\n(8) Devolver Productos del Carrito\n(9) Salir\n===============\n", store_name);
-}
-
-void Printf_Inv(Store* store)
-{
-    NodeProduct* s = store->first;
-    printf("\n|  id   |codebar|  name  |  price | stock  |    tag    |\n");
-    while (s != NULL)
-    {
-        printf("| %05d |%07d| %s | $%.2f |   %02d   | %s |\n", s->products->id, s->products->codebar, s->products->name, s->products->price, s->products->stock, s->products->tag);
-        s = s->next;
-    }
-}
-
-Shopping_Cart* Create_Stack() {
-    Shopping_Cart* stack = (Shopping_Cart*)malloc(sizeof(Shopping_Cart));
-    if (stack) {
-        stack->top = NULL;
-        stack->LenProducts = 0;
-        stack->PriceProducts = 0;
-    }
-    return stack;
-}
-
-void Stack_Push(Shopping_Cart* stack, NodeProduct* product) {
-    ++stack->LenProducts;
-    stack->top = (NodeProduct*)realloc(stack->top, stack->LenProducts * sizeof(NodeProduct));
-    stack->top[stack->LenProducts - 1] = *product;
-    stack->PriceProducts += product->products->price;
-}
-
-NodeProduct* Stack_Pop(Shopping_Cart* stack) {
-    assert(stack->top);
-    --stack->LenProducts;
-    return &stack->top[stack->LenProducts];
-}
-
-void Destroy_Stack(Shopping_Cart** stack) {
-    assert(stack);
-    while ((*stack)->LenProducts != 0)
-    {
-        Stack_Pop(*stack);
-    }
-    free(*stack);
-    *stack = NULL;
-}
-
-void Print_Cart(Shopping_Cart* cart) {
-    int len = Get_Total_Cart(cart);
-    if (len > 0) {
-        printf("\n(%d) Total en el carrito: $%.2f\n", Get_Total_Cart(cart), Get_Total_Amount_Cart(cart));
-    }
-    else {
-        printf("El carrito está vacío.\n");
-        return;
-    }
-}
-
-float Get_Total_Amount_Cart(Shopping_Cart* cart) {
-    return cart->PriceProducts;
-}
-
-int Get_Total_Cart(Shopping_Cart* cart)
-{
-    return cart->LenProducts;
-}
+/*
+* @brief Mueve el cursor a un ID dado por el usuario
+* @param store Puntero de store
+* @param key id a buscar en "store"
+* @return bool si fue posible mover el cursor
+*/
 bool Move_Cursor_By_ID(Store* store, int key)
 {
     for (NodeProduct* n = store->first; n != NULL; n = n->next)
@@ -205,6 +97,12 @@ bool Move_Cursor_By_ID(Store* store, int key)
     }
     return false;
 }
+/*
+* @brief Elimina parte del inventario del producto
+* @param store Puntero de store
+* @return NodeProduct como copia de si mismo
+* @details en caso de no poder retirar más productos retornara un valor 'NULL'
+*/
 NodeProduct* Subtract_Product(Store* store)
 {
     assert(store->cursor);
@@ -217,22 +115,19 @@ NodeProduct* Subtract_Product(Store* store)
         return NULL;
     }
 }
-
-void Print_ticket(Shopping_Cart* cart)
-{
-    int total = Get_Total_Amount_Cart(cart);
-    printf("|id|\t\t|Product Name|\t\t|Price|\n");
-    while (Get_Total_Cart(cart) > 0)
-    {
-        NodeProduct* tmp = Stack_Pop(cart);
-        printf("|%d|\t\t|%s|\t\t|%f|", tmp->products->id, tmp->products->name, tmp->products->price);
-    }printf("\t\t\t\t|Total| %d", total);
-}
-
+/*
+* @brief Obtiene el nodo donde esta el cursor
+* @param cart Puntero de NodeProduct a modificar
+*/
 NodeProduct* Get_Cursor(Store* store)
 {
     return(store->cursor);
 }
+
+/*
+* @brief Añade productos a un NodeProduct
+* @param cart Puntero de NodeProduct a modificar
+*/
 void Sum_Product(NodeProduct* product)
 {
     ++product->products->stock;

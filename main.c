@@ -5,6 +5,9 @@
 */
 
 #include "store.h"
+#include "products.h"
+#include "shopping_cart.h"
+#include "ui.h"
 
 int main() {
 	char store_name[30];
@@ -156,3 +159,4 @@ int main() {
 
 	return 0;
 }
+
