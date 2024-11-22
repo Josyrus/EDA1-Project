@@ -22,6 +22,22 @@ void Create_Node_Products(Products* p, int id, int codebar, float price, int sto
     strcpy(p->name, name);
     strcpy(p->tag, tag);
 }
+
+/**
+ * @brief Modifica un nuevo producto.
+ * @details para evitar redundancia se reutiliza la funcion create node para mayor comodidad de la API
+ * @param p Puntero al producto a crear.
+ * @param id Identificador único del producto.
+ * @param codebar Código de barras del producto.
+ * @param price Precio del producto.
+ * @param stock Stock disponible del producto.
+ * @param name Nombre del producto.
+ * @param tag Etiqueta del producto.
+ */
+void Modify_Product(NodeProduct* p, int codebar, float price, int stock, const char* name, const char* tag)
+{
+    Create_Node_Products(p->products, p->products->id, codebar, price, stock, name, tag);
+}
 /**
  * @brief Crea un nuevo producto en la tienda.
  * @param nstore Puntero a la tienda donde se agregará el producto.

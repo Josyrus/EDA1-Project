@@ -124,6 +124,110 @@ NodeProduct* Get_Cursor(Store* store)
     return(store->cursor);
 }
 
+/**
+ * @brief Calcula el número mínimo de monedas necesarias para hacer un cambio dado.
+ * 
+ * Utiliza programación dinámica para calcular el número mínimo de monedas necesarias
+ * para hacer un cambio dado, considerando hasta `i` denominaciones.
+ * 
+ * @param i Índice actual de las denominaciones que se están considerando.
+ * @param j La cantidad de cambio que se debe realizar.
+ * @param denominaciones Arreglo de denominaciones de monedas disponibles.
+ * @param tabla Tabla de programación dinámica que almacena los resultados intermedios.
+ * 
+ * @return El número mínimo de monedas necesarias para hacer el cambio de la cantidad `j`.
+ *         Retorna `INFINITO` si no es posible hacer el cambio.
+ */
+int compute_change(int i, int j, int denominations[], int table[][MAX_CHANGE]) {
+    if (j == 0) return 0;
+    if (i == 0 || j < 0) return INFINITY;
+
+    if (table[i][j] != -1) {
+        return table[i][j];
+    }
+
+    if (denominations[i - 1] > j) {
+        table[i][j] = compute_change(i - 1, j, denominations, table);
+    } else {
+        table[i][j] = MIN(compute_change(i - 1, j, denominations, table),
+                          1 + compute_change(i, j - denominations[i - 1], denominations, table));
+    }
+
+    return table[i][j];
+}
+/**
+ * @brief Reconstruye y muestra la solución para el problema del cambio de monedas.
+ * 
+ * Esta función sigue los resultados en la tabla de programación dinámica para determinar
+ * qué monedas se utilizaron para hacer el cambio.
+ * 
+ * @param denominaciones Arreglo de denominaciones de monedas disponibles.
+ * @param tabla Tabla de programación dinámica que almacena los resultados.
+ * @param i Número de denominaciones consideradas.
+ * @param j La cantidad de cambio que se debe reconstruir.
+ */
+void reconstruct_solution(int denominations[], int table[][MAX_CHANGE], int i, int j) {
+    int current_denomination = -1;
+    int count = 0; 
+
+    while (j > 0 && i > 0) {
+        if (table[i][j] != table[i - 1][j]) { 
+            if (denominations[i - 1] == current_denomination) {
+                count++;
+            } else {
+                if (count > 0) {
+                    printf("%dX %d\n", count, current_denomination); 
+                }
+                current_denomination = denominations[i - 1]; 
+                count = 1; 
+            }
+            j -= denominations[i - 1]; 
+        } else {
+            i--; 
+        }
+    }
+    if (count > 0) {
+        printf("%dX %d\n", count, current_denomination);
+    }
+}
+/**
+ * @brief Calcula el número mínimo de monedas necesarias para hacer un cambio dado.
+ * 
+ * Utiliza programación dinámica para calcular el número mínimo de monedas necesarias
+ * para hacer un cambio dado, considerando hasta `i` denominaciones.
+ * 
+ * @param i Índice actual de las denominaciones que se están considerando.
+ * @param j La cantidad de cambio que se debe realizar.
+ * @param denominaciones Arreglo de denominaciones de monedas disponibles.
+ * @param tabla Tabla de programación dinámica que almacena los resultados intermedios.
+ * 
+ * @return El número mínimo de monedas necesarias para hacer el cambio de la cantidad `j`.
+ *         Retorna `INFINITO` si no es posible hacer el cambio.
+ */
+int calculate_change(int change, int denominations[], int table[][MAX_CHANGE], int rows, int cols) {
+    if (change < 0 || change >= cols) {
+        return -1;
+    }
+
+    if (table[0][0] == -1) {
+        for (size_t i = 0; i < rows; ++i) {
+            table[i][0] = 0;
+        }
+
+        for (size_t i = 1; i < cols; ++i) {
+            table[0][i] = INFINITY;
+        }
+    }
+
+    int coins = compute_change(rows - 1, change, denominations, table);
+    if (coins == INFINITY) {
+        printf("No hay forma de dar cambio\n");
+    } else {
+        reconstruct_solution(denominations, table, rows - 1, change);
+    }
+    return coins;
+}
+
 /*
 * @brief Añade productos a un NodeProduct
 * @param cart Puntero de NodeProduct a modificar

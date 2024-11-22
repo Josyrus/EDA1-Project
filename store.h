@@ -13,7 +13,10 @@
 #include <assert.h>
 
 
-
+#define INFINITY 10000
+#define MAX_DENOMINATIONS 10
+#define MAX_CHANGE 50000
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
 /**
  * @brief Estructura para representar una tienda.
  */
@@ -48,6 +51,11 @@ void Sum_Product(NodeProduct* product);
 
 NodeProduct* Get_Cursor(Store* store);
 
+int compute_change(int i, int j, int denominations[], int table[][MAX_CHANGE]);
+
+void reconstruct_solution(int denominations[], int table[][MAX_CHANGE], int i, int j);
+
+int calculate_change(int change, int denominations[], int table[][MAX_CHANGE], int rows, int cols);
 #endif
 /**
  * @author

@@ -37,6 +37,7 @@ void Stack_Push(Shopping_Cart* stack, NodeProduct* product) {
 NodeProduct* Stack_Pop(Shopping_Cart* stack) {
     assert(stack->top);
     --stack->LenProducts;
+    stack->PriceProducts-=Get_Total_Amount_Cart(stack);
     return &stack->top[stack->LenProducts];
 }
 /**

@@ -32,6 +32,7 @@ void Create_Node_Products(Products* p, int id, int codebar, float price, int sto
 void Destroy_Product(NodeProduct** node);
 static NodeProduct* New_Node(int id, int codebar, float price, int stock, const char* name, const char* tag);
 void Create_Products(Store* nstore, int codebar, float price, int stock, const char* name, const char* tag);
+void Modify_Product(NodeProduct* p, int codebar, float price, int stock, const char* name, const char* tag);
 #endif
 /**
  * @author

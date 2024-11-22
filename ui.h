@@ -6,7 +6,7 @@ void Print_Title(void);
 void Print_Menu(char* store_name);
 void Printf_Inv(Store* store);
 void Print_Cart(Shopping_Cart* cart);
-void Print_ticket(Shopping_Cart* cart);
+void Print_ticket(Shopping_Cart* cartcart,unsigned int money);
 #endif
 
 /**

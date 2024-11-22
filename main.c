@@ -36,8 +36,13 @@ int main() {
 	}
 
 	bool quit = false, id_exist = false;
-	int option = 0, amount;
-	int id = 0;
+	int option = 0, amount, id = 0;
+	//case 2
+	char name[50], tag[30];
+	int codebar, stock;
+	float price;
+	//case 7
+	int money;
 	do {
 
 		Print_Menu(nstore->store_name);
@@ -48,9 +53,6 @@ int main() {
 			Printf_Inv(nstore);
 			break;
 		case 2:
-			int codebar, stock;
-			float price;
-			char name[50], tag[30];
 			printf("Ingrese el código de barras: ");
 			scanf("%d", &codebar);
 			printf("Ingrese el precio: ");
@@ -99,6 +101,11 @@ int main() {
 			printf("Ingrese el ID del producto que desea sustraer productos: ");
 			scanf("%d", &id);
 			id_exist = Move_Cursor_By_ID(nstore, id);
+			if(!id_exist)
+			{
+			    printf("El producto con ID %d no existe en el inventario.\n", id);
+			    break; 
+			}
 			printf("Ingrese la cantidad de productos a eliminar: ");
 			scanf("%d", &amount);
 			amount = abs(amount);
@@ -131,20 +138,53 @@ int main() {
 			}
 			break;
 		case 7:
+			id = 0;
+			printf("Ingrese el ID del producto que desea modificar");
+			scanf("%d", &id);
+			id_exist = Move_Cursor_By_ID(nstore, id);
+			if(!id_exist)
+			{
+			    printf("El producto con ID %d no existe en el inventario.\n", id);
+			    break; 
+			}
+			printf("Ingrese el código de barras: ");
+			scanf("%d", &codebar);
+			printf("Ingrese el precio: ");
+			scanf("%f", &price);
+			printf("Ingrese la cantidad en stock: ");
+			scanf("%d", &stock);
+			printf("Ingrese el nombre del producto: ");
+			getchar(); // Consume el salto de línea pendiente
+			fgets(name, sizeof(name), stdin);
+			name[strcspn(name, "\n")] = 0; // Elimina el salto de línea
+			printf("Ingrese la etiqueta del producto: ");
+			fgets(tag, sizeof(tag), stdin);
+			tag[strcspn(tag, "\n")] = 0; // Elimina el salto de línea
+			Modify_Product(Get_Cursor(nstore), codebar, price, stock, name, tag);
+			break;
+		case 8:
 			if (Get_Total_Cart(cart) > 0) {
-				Print_ticket(cart);
+			    printf("Ingrese la cantidad de efectivo recibida:");
+			    scanf("%d", &money);
+			    if(money>=Get_Total_Amount_Cart(cart))
+			    {
+				    Print_ticket(cart, money);
+			    }else
+			    {
+			        printf("Compra no realizada, Falta efectivo\n");
+			    }
 			}
 			else {
 				printf("Compra no realizada, carrito vacío\n");
 			}
 			break;
-		case 8:
+		case 9:
 			while (Get_Total_Cart(cart) > 0) {
 				Sum_Product(Stack_Pop(cart));
 			}
 			printf("Carrito vaciado con éxito\n");
 			break;
-		case 9:
+		case 10:
 			quit = true;
 			break;
 		default:
